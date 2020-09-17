@@ -13,6 +13,12 @@ type GormModel struct {
 
 type ApiKey struct {
 	GormModel
+	ApiKey string `json:"apiKey"`
+}
+
+type Item struct {
+	GormModel
+	Uid                string `json:"uid"`
 	Name               string `json:"name"`
 	Description        string `json:"description"`
 	Price              uint   `json:"price"`

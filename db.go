@@ -32,7 +32,10 @@ func InitDB() *gorm.DB {
 	db.AutoMigrate(&Project{})
 	db.AutoMigrate(&Transaction{})
 	db.AutoMigrate(&StockIn{})
+	db.AutoMigrate(&Item{})
 	db.AutoMigrate(&ItemTransaction{})
+
+	populate(db)
 
 	return db
 }

@@ -1,7 +1,11 @@
 package main
 
-import "fmt"
+import (
+	"fmt"
+)
 
 func main() {
-  fmt.Println("Hello dude.")
+	fmt.Println("Hello dude.")
+
+	_ = InitDB()
 }

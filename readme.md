@@ -7,4 +7,5 @@ Cozy Point of Sales application written in Go (backend) and Vue 3 TS (frontend).
 2. `go build && ./cozypos-full`
 
 ## Frontend
-WIP
+1. `cd` to `frontend` dir
+2. Run `npm run build`, folder will be in `dist`

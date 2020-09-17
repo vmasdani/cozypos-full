@@ -7,5 +7,7 @@ Cozy Point of Sales application written in Go (backend) and Vue 3 TS (frontend).
 2. `go build && ./cozypos-full`
 
 ## Frontend
-1. `cd` to `frontend` dir
-2. Run `npm run build`, folder will be in `dist`
+1. Create `.env` file containing `VUE_APP_BASE_URL=http://yourapiurl:yourport`
+2. `cd` to `frontend` dir
+3. Run `npm i` to install dependencies
+4. Run `npm run build`, folder will be in `dist`

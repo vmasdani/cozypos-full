@@ -63,7 +63,7 @@ func populate(db *gorm.DB) {
 			parsedManufacturingPrice, _ := strconv.ParseUint(item[5], 10, 32)
 
 			item := Item{
-				Uid:                item[1],
+				Uid:                fmt.Sprintf("item-%s", item[0]),
 				Name:               item[2],
 				Description:        item[3],
 				Price:              uint(parsedPrice),
@@ -73,24 +73,83 @@ func populate(db *gorm.DB) {
 		}
 	})
 
+	// Transaction
+	populateCsv("csv/transactions.csv", func(transactions [][]string) {
+		for _, transaction := range transactions {
+			customPrice, _ := strconv.ParseUint(transaction[2], 10, 32)
+
+			priceIsCustom := customPrice > 0
+
+			transaction := Transaction{
+				Uid:           fmt.Sprintf("transaction-%s", transaction[0]),
+				CustomPrice:   uint(customPrice),
+				Cashier:       transaction[3],
+				ProjectID:     project.ID,
+				PriceIsCustom: priceIsCustom}
+
+			db.Save(&transaction)
+		}
+	})
+
 	// Stock In
-	populateCsv("csv/itemstockins.csv", func(items [][]string) {
-		// for _, item := range items {
-		// 	fmt.Println(item)
-		// }
+	populateCsv("csv/itemstockins.csv", func(itemStockIns [][]string) {
+		for _, itemStockIn := range itemStockIns {
+			itemId, _ := strconv.ParseUint(itemStockIn[3], 10, 32)
+			qty, _ := strconv.ParseUint(itemStockIn[4], 10, 32)
+
+			var foundItem Item
+
+			if err := db.Where("uid = ?", fmt.Sprintf("item-%d", itemId)).First(&foundItem).Error; err != nil {
+				// fmt.Println(foundItem)
+				fmt.Printf("Item not found!, %d", itemId)
+			} else {
+				// fmt.Println("Item found!")
+				// fmt.Println(foundItem)
+				// fmt.Printf("Qty: %d", qty)
+
+				itemStockIn := StockIn{
+					Uid:       itemStockIn[1],
+					Pic:       itemStockIn[2],
+					ItemID:    uint(foundItem.ID),
+					ProjectID: project.ID,
+					Qty:       uint(qty)}
+
+				db.Save(&itemStockIn)
+			}
+		}
 	})
 
 	// Item Transaction
-	populateCsv("csv/itemtransactions.csv", func(items [][]string) {
-		// for _, item := range items {
-		// 	fmt.Println(item)
-		// }
-	})
+	populateCsv("csv/itemtransactions.csv", func(itemTransactions [][]string) {
+		for _, itemTransaction := range itemTransactions {
+			itemId := itemTransaction[2]
+			transactionId := itemTransaction[3]
+			qty, _ := strconv.ParseUint(itemTransaction[4], 10, 32)
 
-	// Transaction
-	populateCsv("csv/transactions.csv", func(items [][]string) {
-		// for _, item := range items {
-		// 	fmt.Println(item)
-		// }
+			var foundItem Item
+			var foundTransaction Transaction
+
+			itemErr := db.Where("uid = ?", itemId).Find(&foundItem).Error
+			transactionErr := db.Where("uid = ?", transactionId).Find(&foundTransaction).Error
+
+			var foundItemID uint
+			var foundTransactionID uint
+
+			if itemErr == nil {
+				foundItemID = foundItem.ID
+			}
+
+			if transactionErr == nil {
+				foundTransactionID = foundTransaction.ID
+			}
+
+			itemTransaction := ItemTransaction{
+				Uid:           fmt.Sprintf("itemtransaction-%d", itemTransaction[0]),
+				ItemID:        foundItemID,
+				TransactionID: foundTransactionID,
+				Qty:           uint(qty)}
+
+			db.Save(&itemTransaction)
+		}
 	})
 }

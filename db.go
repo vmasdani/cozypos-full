@@ -35,7 +35,7 @@ func InitDB() *gorm.DB {
 	db.AutoMigrate(&Item{})
 	db.AutoMigrate(&ItemTransaction{})
 
-	populate(db)
+	// populate(db)
 
 	return db
 }

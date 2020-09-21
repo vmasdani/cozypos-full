@@ -17,7 +17,7 @@ func All(db *gorm.DB, table interface{}, w http.ResponseWriter, r *http.Request)
 func Get(db *gorm.DB, table interface{}, w http.ResponseWriter, r *http.Request) {
 	id := mux.Vars(r)["id"]
 	w.Header().Set("content-type", "application/json")
-	db.Where("id = ?", id).Find(table)
+	db.Where("id = ?", id).First(table)
 	json.NewEncoder(w).Encode(table)
 }
 

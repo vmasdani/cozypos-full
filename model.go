@@ -18,27 +18,30 @@ type ApiKey struct {
 
 type Item struct {
 	GormModel
-	Uid                string `json:"uid"`
-	Name               string `json:"name"`
-	Description        string `json:"description"`
-	Price              uint   `json:"price"`
-	ManufacturingPrice uint   `json:"manufacturingPrice"`
+	Uid                string            `json:"uid"`
+	Name               string            `json:"name"`
+	Description        string            `json:"description"`
+	Price              uint              `json:"price"`
+	ManufacturingPrice uint              `json:"manufacturingPrice"`
+	ItemTransactions   []ItemTransaction `json:"itemTransactions"`
 }
 
 type Project struct {
 	GormModel
-	Uid       string    `json:"uid"`
-	Name      string    `json:"name"`
-	StartDate time.Time `json:"startDate"`
+	Uid          string        `json:"uid"`
+	Name         string        `json:"name"`
+	StartDate    time.Time     `json:"startDate"`
+	Transactions []Transaction `json:"transactions"`
 }
 
 type Transaction struct {
 	GormModel
-	Uid           string `json:"uid"`
-	Cashier       string `json:"cashier"`
-	PriceIsCustom bool   `json:"priceIsCustom"`
-	CustomPrice   uint   `json:"customPrice"`
-	ProjectID     uint   `json:"projectId"`
+	Uid              string            `json:"uid"`
+	Cashier          string            `json:"cashier"`
+	PriceIsCustom    bool              `json:"priceIsCustom"`
+	CustomPrice      uint              `json:"customPrice"`
+	ProjectID        uint              `json:"projectId"`
+	ItemTransactions []ItemTransaction `json:"itemTransactions"`
 }
 
 type StockIn struct {
@@ -56,4 +59,5 @@ type ItemTransaction struct {
 	ItemID        uint   `json:"itemId"`
 	TransactionID uint   `json:"transactionId"`
 	Qty           uint   `json:"qty"`
+	Item          Item   `json:"item"`
 }

@@ -1,0 +1,34 @@
+package main
+
+import (
+	"net/http"
+
+	"github.com/gorilla/mux"
+	"gorm.io/gorm"
+)
+
+func Route(r *mux.Router, db *gorm.DB) {
+	// Transactions
+	r.HandleFunc("/transactions", func(w http.ResponseWriter, r *http.Request) {
+		var transactions []Transaction
+		All(db, &transactions, w, r)
+	}).Methods("GET")
+
+	r.HandleFunc("/transactions/{id}", func(w http.ResponseWriter, r *http.Request) {
+		var transaction Transaction
+		All(db, &transaction, w, r)
+	}).Methods("GET")
+
+	// Items
+	r.HandleFunc("/items", func(w http.ResponseWriter, r *http.Request) {
+		var items []Item
+		All(db, &items, w, r)
+	}).Methods("GET")
+
+	r.HandleFunc("/items/{id}", func(w http.ResponseWriter, r *http.Request) {
+		var item Item
+		Get(db, &item, w, r)
+	}).Methods("GET")
+
+	r.HandleFunc("/projects/{id}/transactions", GetAllProjectTransactions(r, db))
+}

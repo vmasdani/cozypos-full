@@ -129,22 +129,31 @@ func populate(db *gorm.DB) {
 			var foundItem Item
 			var foundTransaction Transaction
 
-			itemErr := db.Where("uid = ?", itemId).Find(&foundItem).Error
-			transactionErr := db.Where("uid = ?", transactionId).Find(&foundTransaction).Error
+			itemUid := fmt.Sprintf("item-%s", itemId)
+			transactionUid := fmt.Sprintf("transaction-%s", transactionId)
+
+			itemErr := db.Where("uid = ?", itemUid).First(&foundItem).Error
+			transactionErr := db.Where("uid = ?", transactionUid).First(&foundTransaction).Error
 
 			var foundItemID uint
 			var foundTransactionID uint
 
-			if itemErr == nil {
+			if itemErr != nil {
+				fmt.Println("Item not found.")
+			} else {
 				foundItemID = foundItem.ID
 			}
 
-			if transactionErr == nil {
+			if transactionErr != nil {
+				fmt.Println("Transaction not found.")
+			} else {
 				foundTransactionID = foundTransaction.ID
 			}
 
+			fmt.Printf("Trans id %s item id %s\n", transactionUid, itemUid)
+
 			itemTransaction := ItemTransaction{
-				Uid:           fmt.Sprintf("itemtransaction-%d", itemTransaction[0]),
+				Uid:           fmt.Sprintf("itemtransaction-%s", itemTransaction[0]),
 				ItemID:        foundItemID,
 				TransactionID: foundTransactionID,
 				Qty:           uint(qty)}

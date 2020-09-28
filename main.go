@@ -5,6 +5,7 @@ import (
 	"net/http"
 
 	"github.com/gorilla/mux"
+	"github.com/rs/cors"
 )
 
 func main() {
@@ -17,8 +18,15 @@ func main() {
 		fmt.Fprintf(w, "Hello world!")
 	})
 
+	r.HandleFunc("/ts", Ts())
+
 	Route(r, db)
 
+	handler := cors.New(cors.Options{
+		AllowedOrigins: []string{"*"},
+		AllowedMethods: []string{"GET", "POST", "PUT", "DELETE"},
+		AllowedHeaders: []string{"*"}}).Handler(r)
+
 	fmt.Println("Serving on port 8080!")
-	http.ListenAndServe(":8080", r)
+	http.ListenAndServe(":8080", handler)
 }

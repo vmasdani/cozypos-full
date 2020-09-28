@@ -19,6 +19,11 @@ func Route(r *mux.Router, db *gorm.DB) {
 		All(db, &transaction, w, r)
 	}).Methods("GET")
 
+	r.HandleFunc("/transactions/{id}", func(w http.ResponseWriter, r *http.Request) {
+		var transaction Transaction
+		Delete(db, &transaction, w, r)
+	}).Methods("DELETE")
+
 	// Items
 	r.HandleFunc("/items", func(w http.ResponseWriter, r *http.Request) {
 		var items []Item
@@ -30,5 +35,29 @@ func Route(r *mux.Router, db *gorm.DB) {
 		Get(db, &item, w, r)
 	}).Methods("GET")
 
-	r.HandleFunc("/projects/{id}/transactions", GetAllProjectTransactions(r, db))
+	r.HandleFunc("/items/{id}", func(w http.ResponseWriter, r *http.Request) {
+		var item Item
+		Get(db, &item, w, r)
+	}).Methods("DELETE")
+
+	r.HandleFunc("/itemstocks", ItemStocks(db))
+
+	// Projects
+	r.HandleFunc("/projects", func(w http.ResponseWriter, r *http.Request) {
+		var projects []Project
+		All(db, &projects, w, r)
+	}).Methods("GET")
+
+	r.HandleFunc("/projects/{id}", func(w http.ResponseWriter, r *http.Request) {
+		var project Project
+		All(db, &project, w, r)
+	}).Methods("GET")
+
+	r.HandleFunc("/projects/{id}", func(w http.ResponseWriter, r *http.Request) {
+		var project Project
+		Delete(db, &project, w, r)
+	}).Methods("GET")
+
+	r.HandleFunc("/projectsview", AllProjectsView(db))
+	r.HandleFunc("/projects/{id}/transactions", GetAllProjectTransactions(db))
 }

@@ -46,7 +46,7 @@ func populateCsv(path string, parse func(arr [][]string)) {
 
 func populate(db *gorm.DB) {
 	// Project
-	timeParsed, _ := time.Parse(time.RFC3339, "2012-02-23T22:08:41+00:00")
+	timeParsed, _ := time.Parse(time.RFC3339, "2020-02-23T22:08:41+00:00")
 
 	project := Project{
 		Name:      "CF14",

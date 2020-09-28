@@ -6,9 +6,9 @@ import (
 
 type GormModel struct {
 	ID        uint       `gorm:"primary_key" json:"id"`
-	CreatedAt time.Time  `json:"createdAt"`
-	UpdatedAt time.Time  `json:"updatedAt"`
-	DeletedAt *time.Time `json:"deletedAt"`
+	CreatedAt time.Time  `json:"createdAt" ts_type:"string"`
+	UpdatedAt time.Time  `json:"updatedAt" ts_type:"string"`
+	DeletedAt *time.Time `json:"deletedAt" ts_type:"string"`
 }
 
 type ApiKey struct {
@@ -24,13 +24,14 @@ type Item struct {
 	Price              uint              `json:"price"`
 	ManufacturingPrice uint              `json:"manufacturingPrice"`
 	ItemTransactions   []ItemTransaction `json:"itemTransactions"`
+	StockIns           []StockIn         `json:"stockIns"`
 }
 
 type Project struct {
 	GormModel
 	Uid          string        `json:"uid"`
 	Name         string        `json:"name"`
-	StartDate    time.Time     `json:"startDate"`
+	StartDate    time.Time     `json:"startDate" ts_type:"string"`
 	Transactions []Transaction `json:"transactions"`
 }
 

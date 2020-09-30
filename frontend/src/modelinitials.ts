@@ -28,7 +28,7 @@ export const initialProject: Project = {
   id: 0,
   uid: "",
   name: "",
-  startDate: makeDateString(new Date()),
+  startDate: `${makeDateString(new Date())}T00:00:00Z`,
   created_at: undefined,
   updated_at: undefined
 }

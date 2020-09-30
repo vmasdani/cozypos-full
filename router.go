@@ -8,6 +8,9 @@ import (
 )
 
 func Route(r *mux.Router, db *gorm.DB) {
+	// Login
+	r.HandleFunc("/login", Login(db)).Methods("POST")
+
 	// Transactions
 	r.HandleFunc("/transactions", func(w http.ResponseWriter, r *http.Request) {
 		var transactions []Transaction
@@ -18,6 +21,8 @@ func Route(r *mux.Router, db *gorm.DB) {
 		var transaction Transaction
 		All(db, &transaction, w, r)
 	}).Methods("GET")
+
+	r.HandleFunc("/transactions/view/{id}", ViewTransaction(db)).Methods("GET")
 
 	r.HandleFunc("/transactions/{id}", func(w http.ResponseWriter, r *http.Request) {
 		var transaction Transaction
@@ -50,13 +55,18 @@ func Route(r *mux.Router, db *gorm.DB) {
 
 	r.HandleFunc("/projects/{id}", func(w http.ResponseWriter, r *http.Request) {
 		var project Project
-		All(db, &project, w, r)
+		Get(db, &project, w, r)
 	}).Methods("GET")
+
+	r.HandleFunc("/projects", func(w http.ResponseWriter, r *http.Request) {
+		var project Project
+		Post(db, &project, w, r)
+	}).Methods("POST")
 
 	r.HandleFunc("/projects/{id}", func(w http.ResponseWriter, r *http.Request) {
 		var project Project
 		Delete(db, &project, w, r)
-	}).Methods("GET")
+	}).Methods("DELETE")
 
 	r.HandleFunc("/projectsview", AllProjectsView(db))
 	r.HandleFunc("/projects/{id}/transactions", GetAllProjectTransactions(db))

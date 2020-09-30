@@ -29,6 +29,12 @@ func Ts() func(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
+func Login(db *gorm.DB) func(w http.ResponseWriter, r *http.Request) {
+	return func(w http.ResponseWriter, r *http.Request) {
+
+	}
+}
+
 func All(db *gorm.DB, table interface{}, w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("content-type", "application/json")
 	db.Find(table)
@@ -37,6 +43,7 @@ func All(db *gorm.DB, table interface{}, w http.ResponseWriter, r *http.Request)
 
 func Get(db *gorm.DB, table interface{}, w http.ResponseWriter, r *http.Request) {
 	id := mux.Vars(r)["id"]
+	// fmt.Println("ID:", id)
 	w.Header().Set("content-type", "application/json")
 	db.Where("id = ?", id).First(table)
 	json.NewEncoder(w).Encode(table)
@@ -44,8 +51,10 @@ func Get(db *gorm.DB, table interface{}, w http.ResponseWriter, r *http.Request)
 
 func Post(db *gorm.DB, table interface{}, w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("content-type", "application/json")
+	json.NewDecoder(r.Body).Decode(table)
 	db.Save(table)
 	json.NewEncoder(w).Encode(table)
+	w.WriteHeader(http.StatusCreated)
 }
 
 func Delete(db *gorm.DB, table interface{}, w http.ResponseWriter, r *http.Request) {
@@ -65,7 +74,7 @@ func GetAllProjectTransactions(db *gorm.DB) func(w http.ResponseWriter, r *http.
 
 		transactionViews := []TransactionView{}
 		var transactions []Transaction
-		db.Order("id desc").Find(&transactions)
+		db.Where("project_id = ?", project.ID).Order("id desc").Find(&transactions)
 
 		for _, transaction := range transactions {
 			var itemTransactions []ItemTransaction
@@ -167,5 +176,25 @@ func AllProjectsView(db *gorm.DB) func(w http.ResponseWriter, r *http.Request) {
 		}
 
 		json.NewEncoder(w).Encode(projectsView)
+	}
+}
+
+func ViewTransaction(db *gorm.DB) func(w http.ResponseWriter, r *http.Request) {
+	return func(w http.ResponseWriter, r *http.Request) {
+		id := mux.Vars(r)["id"]
+		var transaction Transaction
+		db.Preload("ItemTransactions.Item").Where("id = ?", id).First(&transaction)
+
+		var transactionView TransactionView
+
+		transactionView.Transaction = transaction
+
+		for _, itemTransaction := range transaction.ItemTransactions {
+			transactionView.ItemTransactions = append(transactionView.ItemTransactions, ItemTransactionView{
+				Item:            itemTransaction.Item,
+				ItemTransaction: itemTransaction})
+		}
+
+		json.NewEncoder(w).Encode(transactionView)
 	}
 }

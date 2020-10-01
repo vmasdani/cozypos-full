@@ -9,6 +9,7 @@ Cozy Point of Sales application written in Go (backend) and Vue 3 TS (frontend).
 DB_USERNAME=myuser
 DB_PASSWORD=mypass
 DB_NAME=mydbname
+PASSWORD=mypassword #generated from /generate
 ```
 3. `go build && ./cozypos-full`
 

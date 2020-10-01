@@ -1,11 +1,18 @@
 package main
 
 import (
+	"encoding/base64"
 	"encoding/json"
+	"fmt"
+	"log"
 	"net/http"
+	"os"
+	"time"
 
 	"github.com/gorilla/mux"
+	"github.com/joho/godotenv"
 	"github.com/tkrajina/typescriptify-golang-structs/typescriptify"
+	"golang.org/x/crypto/bcrypt"
 	"gorm.io/gorm"
 )
 
@@ -31,7 +38,63 @@ func Ts() func(w http.ResponseWriter, r *http.Request) {
 
 func Login(db *gorm.DB) func(w http.ResponseWriter, r *http.Request) {
 	return func(w http.ResponseWriter, r *http.Request) {
+		var loginPostBody LoginPostBody
+		json.NewDecoder(r.Body).Decode(&loginPostBody)
 
+		err := godotenv.Load()
+
+		if err != nil {
+			w.WriteHeader(http.StatusInternalServerError)
+			fmt.Fprintf(w, "Error loading .env!")
+			log.Fatal("Error loading .env file.")
+			return
+		}
+
+		password := os.Getenv("PASSWORD")
+		// fmt.Println(loginPostBody.Password, password)
+		passwordNotMatchErr := bcrypt.CompareHashAndPassword([]byte(password), []byte(loginPostBody.Password))
+
+		if passwordNotMatchErr != nil {
+			w.WriteHeader(http.StatusInternalServerError)
+			fmt.Fprintf(w, "Password do not match!")
+			return
+		}
+
+		encodedUsername := base64.StdEncoding.EncodeToString([]byte(loginPostBody.Username))
+
+		var apiKey ApiKey
+		if err := db.Where("api_key like ?", fmt.Sprintf("%s%%", encodedUsername)).First(&apiKey).Error; err != nil {
+			fmt.Println("API key record not found! Creating..")
+		} else {
+			db.Delete(&apiKey)
+		}
+
+		timestamp, _ := bcrypt.GenerateFromPassword([]byte(time.Now().String()), bcrypt.DefaultCost)
+		// fmt.Println("timestamp", string(timestamp))
+
+		apiKeyString := fmt.Sprintf("%s:%s", encodedUsername, timestamp)
+
+		db.Save(&ApiKey{
+			ApiKey: apiKeyString})
+
+		fmt.Fprintf(w, "%s", apiKeyString)
+	}
+}
+
+func GeneratePassword() func(w http.ResponseWriter, r *http.Request) {
+	return func(w http.ResponseWriter, r *http.Request) {
+		// var passwordPostBody PasswordPostBody
+		// json.NewDecoder(r.Body).Decode(&passwordPostBody)
+		password := r.URL.Query()["password"]
+
+		if len(password) == 0 {
+			w.WriteHeader(http.StatusInternalServerError)
+			fmt.Fprintf(w, "No password query param provided.")
+			return
+		}
+
+		generatedPassword, _ := bcrypt.GenerateFromPassword([]byte(password[0]), bcrypt.DefaultCost)
+		fmt.Fprintf(w, "'%s'", string(generatedPassword))
 	}
 }
 
@@ -78,7 +141,7 @@ func GetAllProjectTransactions(db *gorm.DB) func(w http.ResponseWriter, r *http.
 
 		for _, transaction := range transactions {
 			var itemTransactions []ItemTransaction
-			db.Preload("Item").Where("id = ?", transaction.ID).Find(&itemTransactions)
+			db.Preload("Item").Where("transaction_id = ?", transaction.ID).Find(&itemTransactions)
 
 			totalPrice := uint(0)
 
@@ -87,9 +150,9 @@ func GetAllProjectTransactions(db *gorm.DB) func(w http.ResponseWriter, r *http.
 			}
 
 			transactionView := TransactionView{
-				Transaction: transaction,
-				// ItemTransactions: itemTransactions,
-				TotalPrice: totalPrice}
+				Transaction:      transaction,
+				ItemTransactions: []ItemTransactionView{},
+				TotalPrice:       totalPrice}
 
 			for _, itemTransaction := range itemTransactions {
 				itemTransactionView := ItemTransactionView{
@@ -136,6 +199,72 @@ func ItemStocks(db *gorm.DB) func(w http.ResponseWriter, r *http.Request) {
 		}
 
 		json.NewEncoder(w).Encode(&itemStockViews)
+	}
+}
+
+func ItemSearch(db *gorm.DB) func(w http.ResponseWriter, r *http.Request) {
+	return func(w http.ResponseWriter, r *http.Request) {
+		var items []Item
+
+		itemName := r.URL.Query()["name"]
+
+		if len(itemName) == 0 {
+			w.WriteHeader(http.StatusBadRequest)
+			fmt.Fprintf(w, "No name parameter provided.")
+			return
+		} else {
+			db.Limit(5).Where("name like ?", fmt.Sprintf("%%%s%%", itemName[0])).Find(&items)
+
+			itemStockViews := []ItemStockView{}
+
+			for _, item := range items {
+				var stockIns []StockIn
+				var itemTransactions []ItemTransaction
+
+				totalStock := 0
+
+				db.Where("item_id = ?", item.ID).Find(&stockIns)
+				db.Where("item_id = ?", item.ID).Find(&itemTransactions)
+
+				for _, stockIn := range stockIns {
+					totalStock += int(stockIn.Qty)
+				}
+
+				for _, itemTransaction := range itemTransactions {
+					totalStock -= int(itemTransaction.Qty)
+				}
+
+				itemStockViews = append(itemStockViews, ItemStockView{
+					Item:    item,
+					InStock: totalStock})
+			}
+
+			json.NewEncoder(w).Encode(&itemStockViews)
+		}
+	}
+}
+
+func SaveTransaction(db *gorm.DB) func(w http.ResponseWriter, r *http.Request) {
+	return func(w http.ResponseWriter, r *http.Request) {
+		var transactionPostBody TransactionPostBody
+		json.NewDecoder(r.Body).Decode(&transactionPostBody)
+
+		db.Save(&transactionPostBody.Transaction)
+
+		for _, itemTransactionView := range transactionPostBody.ItemTransactions {
+			itemTransactionView.ItemTransaction.TransactionID = transactionPostBody.Transaction.ID
+			db.Save(&itemTransactionView.ItemTransaction)
+		}
+
+		for _, itemTransactionID := range transactionPostBody.ItemTransactionDeleteIds {
+			// var itemTransaction ItemTransaction
+			// fmt.Println("Item Transaction ID:", itemTransactionID)
+			// db.Where("id = ?", itemTransactionID).Delete(&itemTransaction)
+			db.Delete(&ItemTransaction{}, itemTransactionID)
+		}
+
+		w.WriteHeader(http.StatusCreated)
+		json.NewEncoder(w).Encode(transactionPostBody.Transaction)
 	}
 }
 
@@ -188,6 +317,7 @@ func ViewTransaction(db *gorm.DB) func(w http.ResponseWriter, r *http.Request) {
 		var transactionView TransactionView
 
 		transactionView.Transaction = transaction
+		transactionView.ItemTransactions = []ItemTransactionView{}
 
 		for _, itemTransaction := range transaction.ItemTransactions {
 			transactionView.ItemTransactions = append(transactionView.ItemTransactions, ItemTransactionView{

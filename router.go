@@ -10,6 +10,7 @@ import (
 func Route(r *mux.Router, db *gorm.DB) {
 	// Login
 	r.HandleFunc("/login", Login(db)).Methods("POST")
+	r.HandleFunc("/generate", GeneratePassword()).Methods("GET")
 
 	// Transactions
 	r.HandleFunc("/transactions", func(w http.ResponseWriter, r *http.Request) {
@@ -22,12 +23,13 @@ func Route(r *mux.Router, db *gorm.DB) {
 		All(db, &transaction, w, r)
 	}).Methods("GET")
 
-	r.HandleFunc("/transactions/view/{id}", ViewTransaction(db)).Methods("GET")
-
 	r.HandleFunc("/transactions/{id}", func(w http.ResponseWriter, r *http.Request) {
 		var transaction Transaction
 		Delete(db, &transaction, w, r)
 	}).Methods("DELETE")
+
+	r.HandleFunc("/transactions/view/{id}", ViewTransaction(db)).Methods("GET")
+	r.HandleFunc("/transactionsave", SaveTransaction(db)).Methods("POST")
 
 	// Items
 	r.HandleFunc("/items", func(w http.ResponseWriter, r *http.Request) {
@@ -46,6 +48,7 @@ func Route(r *mux.Router, db *gorm.DB) {
 	}).Methods("DELETE")
 
 	r.HandleFunc("/itemstocks", ItemStocks(db))
+	r.HandleFunc("/itemsearch", ItemSearch(db))
 
 	// Projects
 	r.HandleFunc("/projects", func(w http.ResponseWriter, r *http.Request) {

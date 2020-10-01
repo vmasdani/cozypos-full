@@ -86,6 +86,7 @@ export default defineComponent({
         state.requestStatus = 'Success'
       } catch(e) {
         console.log(e)
+        alert(e)
         state.requestStatus = 'Error'
         state.errorMessage = e
       }

@@ -328,3 +328,30 @@ func ViewTransaction(db *gorm.DB) func(w http.ResponseWriter, r *http.Request) {
 		json.NewEncoder(w).Encode(transactionView)
 	}
 }
+
+func ItemStockIns(db *gorm.DB) func(w http.ResponseWriter, r *http.Request) {
+	return func(w http.ResponseWriter, r *http.Request) {
+		id := mux.Vars(r)["id"]
+		w.Header().Set("content-type", "application/json")
+		var item Item
+		db.Where("id = ?", id).First(&item)
+
+		stockInViews := []StockInView{}
+
+		var stockIns []StockIn
+		db.Where("item_id = ?", item.ID).Find(&stockIns)
+
+		for _, stockIn := range stockIns {
+			var project Project
+			db.Where("id = ?", stockIn.ProjectID).Find(&project)
+
+			stockInViews = append(stockInViews, StockInView{
+				StockIn: stockIn,
+				Project: project})
+		}
+
+		json.NewEncoder(w).Encode(&ItemStockInsView{
+			Item:     item,
+			StockIns: stockInViews})
+	}
+}

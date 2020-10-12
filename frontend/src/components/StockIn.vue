@@ -63,7 +63,7 @@
           </div>
           <div class="bg-gray-600 px-2 py-1 text-white rounded-full font-semibold">{{ stockInView.stockIn.pic }}</div>
         </div>
-        <div>On: {{ new Date(stockInView.stockIn.created_at).toString() }}</div>
+        <div>On: {{ new Date(stockInView.stockIn.createdAt).toString() }}</div>
         <div v-if="stockInView.project">For project: <span class="font-semibold p-1 rounded-lg bg-orange-700 text-white">{{ stockInView.project.name }}</span></div>
       </div>
     </div>

@@ -21,6 +21,16 @@ type ItemStockView struct {
 	InStock int  `json:"inStock"`
 }
 
+type ItemStockInsView struct {
+	Item     Item          `json:"item"`
+	StockIns []StockInView `json:"stockIns"`
+}
+
+type StockInView struct {
+	StockIn StockIn `json:"stockIn"`
+	Project Project `json:"project"`
+}
+
 type ProjectsView struct {
 	Projects    []ProjectView `json:"projects"`
 	TotalIncome int           `json:"totalIncome"`

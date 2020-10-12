@@ -146,7 +146,7 @@ export default defineComponent({
       try {
         state.requestStatus = 'Loading'
 
-        const response = await fetch(`${store.baseUrl}/items/${itemId}/stockinsadd`, {
+        const response = await fetch(`${store.baseUrl}/itemstockinsadd`, {
           method: 'POST',
           headers: {
             'authorization': store.apiKey

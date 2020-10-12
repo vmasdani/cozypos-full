@@ -355,3 +355,14 @@ func ItemStockIns(db *gorm.DB) func(w http.ResponseWriter, r *http.Request) {
 			StockIns: stockInViews})
 	}
 }
+
+func ItemStockInsAdd(db *gorm.DB) func(w http.ResponseWriter, r *http.Request) {
+	return func(w http.ResponseWriter, r *http.Request) {
+		// id := mux.Vars(r)["id"]
+		w.Header().Set("content-type", "application/json")
+		var stockIn StockIn
+		json.NewDecoder(r.Body).Decode(&stockIn)
+		db.Save(&stockIn)
+		w.WriteHeader(http.StatusCreated)
+	}
+}

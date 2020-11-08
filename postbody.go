@@ -14,3 +14,10 @@ type TransactionPostBody struct {
 	ItemTransactions         []ItemTransactionView `json:"itemTransactions"`
 	ItemTransactionDeleteIds []uint                `json:"itemTransactionDeleteIds"`
 }
+
+type ItemPostBody struct {
+	InitialStockQty  uint    `json:"initialStockQty"`
+	Item             Item    `json:"item"`
+	Project          Project `json:"project"`
+	WithInitialStock bool    `json:"withInitialStock"`
+}

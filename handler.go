@@ -175,7 +175,11 @@ func ItemStocks(db *gorm.DB) func(w http.ResponseWriter, r *http.Request) {
 	return func(w http.ResponseWriter, r *http.Request) {
 		w.Header().Set("content-type", "application/json")
 		var items []Item
-		db.Preload("ItemTransactions").Preload("StockIns").Find(&items)
+		db.
+			Preload("ItemTransactions").
+			Preload("StockIns").
+			Order("id desc").
+			Find(&items)
 
 		itemStockViews := []ItemStockView{}
 
@@ -363,5 +367,24 @@ func ItemStockInsAdd(db *gorm.DB) func(w http.ResponseWriter, r *http.Request) {
 		json.NewDecoder(r.Body).Decode(&stockIn)
 		db.Save(&stockIn)
 		w.WriteHeader(http.StatusCreated)
+	}
+}
+
+func ItemSave(db *gorm.DB) func(w http.ResponseWriter, r *http.Request) {
+	return func(w http.ResponseWriter, r *http.Request) {
+		var itemPostBody ItemPostBody
+		json.NewDecoder(r.Body).Decode(&itemPostBody)
+
+		db.Save(&itemPostBody.Item)
+
+		newStockIn := StockIn{
+			ItemID: itemPostBody.Item.ID,
+			Qty:    itemPostBody.InitialStockQty,
+		}
+
+		db.Save(&newStockIn)
+
+		w.WriteHeader(http.StatusCreated)
+		json.NewEncoder(w).Encode(&itemPostBody.Item)
 	}
 }

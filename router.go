@@ -51,6 +51,7 @@ func Route(r *mux.Router, db *gorm.DB) {
 	r.HandleFunc("/itemsearch", ItemSearch(db))
 	r.HandleFunc("/items/{id}/stockins", ItemStockIns(db))
 	r.HandleFunc("/itemstockinsadd", ItemStockInsAdd(db))
+	r.HandleFunc("/itemsave", ItemSave(db))
 
 	// Projects
 	r.HandleFunc("/projects", func(w http.ResponseWriter, r *http.Request) {

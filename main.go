@@ -18,8 +18,7 @@ func main() {
 		fmt.Fprintf(w, "Hello world!")
 	})
 
-	r.HandleFunc("/ts", Ts())
-
+	// r.HandleFunc("/ts", Ts())
 	Route(r, db)
 
 	handler := cors.New(cors.Options{
@@ -28,5 +27,8 @@ func main() {
 		AllowedHeaders: []string{"*"}}).Handler(r)
 
 	fmt.Println("Serving on port 8080!")
+
+	// Generate typescript definitions
+	Ts()
 	http.ListenAndServe(":8080", handler)
 }

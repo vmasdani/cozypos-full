@@ -16,24 +16,23 @@ import (
 	"gorm.io/gorm"
 )
 
-func Ts() func(w http.ResponseWriter, r *http.Request) {
-	return func(w http.ResponseWriter, r *http.Request) {
-		converter := typescriptify.New()
+func Ts() {
+	converter := typescriptify.New()
+	converter.CreateInterface = true
 
-		structs := []interface{}{
-			ApiKey{},
-			Item{},
-			Project{},
-			Transaction{},
-			StockIn{},
-			ItemTransaction{}}
+	structs := []interface{}{
+		ApiKey{},
+		Item{},
+		Project{},
+		Transaction{},
+		StockIn{},
+		ItemTransaction{}}
 
-		for _, myStruct := range structs {
-			converter.Add(myStruct)
-		}
-
-		converter.ConvertToFile("./newmodel.d.ts")
+	for _, myStruct := range structs {
+		converter.Add(myStruct)
 	}
+
+	converter.ConvertToFile("./newmodel.d.ts")
 }
 
 func Login(db *gorm.DB) func(w http.ResponseWriter, r *http.Request) {

@@ -23,8 +23,8 @@ type Item struct {
 	Description        string            `json:"description"`
 	Price              uint              `json:"price"`
 	ManufacturingPrice uint              `json:"manufacturingPrice"`
-	ItemTransactions   []ItemTransaction `json:"itemTransactions"`
-	StockIns           []StockIn         `json:"stockIns"`
+	ItemTransactions   []ItemTransaction `json:"itemTransactions" ts_type:"ItemTransaction[] | null"`
+	StockIns           []StockIn         `json:"stockIns" ts_type:"StockIn[] | null"`
 }
 
 type Project struct {
@@ -32,7 +32,7 @@ type Project struct {
 	Uid          string        `json:"uid"`
 	Name         string        `json:"name"`
 	StartDate    time.Time     `json:"startDate" ts_type:"string"`
-	Transactions []Transaction `json:"transactions"`
+	Transactions []Transaction `json:"transactions" ts_type:"Transaction[] | null"`
 }
 
 type Transaction struct {
@@ -42,7 +42,7 @@ type Transaction struct {
 	PriceIsCustom    bool              `json:"priceIsCustom"`
 	CustomPrice      uint              `json:"customPrice"`
 	ProjectID        uint              `json:"projectId"`
-	ItemTransactions []ItemTransaction `json:"itemTransactions"`
+	ItemTransactions []ItemTransaction `json:"itemTransactions" ts_type:"ItemTransaction[] | null"`
 }
 
 type StockIn struct {

@@ -231,7 +231,7 @@ export default defineComponent({
       try {
         const response = await fetch(`${store.baseUrl}/itemsearch?name=${itemName}`, {
           headers: {
-            "authorization": store.apiKey
+            "authorization": store.apiKey ?? ""
           }
         })
 
@@ -303,7 +303,7 @@ export default defineComponent({
         const response = await fetch(`${store.baseUrl}/transactionsave`, {
           method: 'POST',
           headers: {
-            'authorization': store.apiKey
+            'authorization': store.apiKey ?? ""
           },
           body: JSON.stringify({ 
             transaction: {
@@ -346,7 +346,7 @@ export default defineComponent({
           const response = await fetch(`${store.baseUrl}/transactions/${transactionId}`, {
             method: 'DELETE',
             headers: {
-              'authorization': store.apiKey
+              'authorization': store.apiKey ?? ""
             }
           })
 

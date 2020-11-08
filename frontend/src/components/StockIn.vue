@@ -24,11 +24,15 @@
     <div class="flex m-2 items-center">
       <div class="uppercase text-sm font-semibold">Select Project:</div>
       <div class="ml-2">
-        <select class="block bg-gray-200 appearance-none p-2 rounded-lg">
+        <select 
+          class="block bg-gray-200 appearance-none p-2 rounded-lg"
+          @input="handleSelectProject"
+        >
+          <option></option>
           <option
             v-for="project in state.projects"
             :key="project.id"
-            @click="handleSelectProject(project)"
+            :value="project.id"
           >
             {{ project.name }}
           </option>
@@ -93,7 +97,7 @@ import LoadingIcon from "@/components/icons/LoadingIcon.vue";
 import { ItemStockInsView } from "@/view";
 import { StockInPostBody } from "@/postbody";
 import { Project, StockIn } from "@/model";
-import { initialStockIn } from "@/modelinitials";
+import { initialProject, initialStockIn } from "@/modelinitials";
 export default defineComponent({
   components: {
     LoadingIcon,
@@ -106,7 +110,7 @@ export default defineComponent({
       requestStatus: "NotAsked" as RequestStatus,
       itemStockInsView: null as ItemStockInsView | null,
       projects: [] as Project[],
-      selectedProject: null as Project | null,
+      selectedProject: { ...initialProject } as Project,
       qty: 0,
     });
 
@@ -143,7 +147,9 @@ export default defineComponent({
 
         const projects = (await response.json()) as Project[];
         state.projects = projects;
-        state.selectedProject = projects.length > 0 ? projects[0] : null;
+
+        // if (state.selectedProject)
+        // state.selectedProject = projects.length > 0 ? projects[0] : null;
       } catch (e) {
         console.log(e);
       }
@@ -157,34 +163,45 @@ export default defineComponent({
     const handleInsertStockIn = async (e: any) => {
       e.preventDefault();
 
-      try {
-        state.requestStatus = "Loading";
+      if (state.selectedProject.id === 0) {
+        alert("Please select project first.");
+      } else if (state.qty === 0) {
+        alert("Please insert qty more than 0.");
+      } else {
+        try {
+          state.requestStatus = "Loading";
+          console.log("Selected project id:", state.selectedProject.id);
 
-        const response = await fetch(`${store.baseUrl}/itemstockinsadd`, {
-          method: "POST",
-          headers: {
-            authorization: store.apiKey ?? "",
-          },
-          body: JSON.stringify({
-            ...initialStockIn,
-            qty: state.qty,
-            itemId: isNaN(parseInt(itemId)) ? 0 : parseInt(itemId),
-            projectId: state.selectedProject ? state.selectedProject.id : 0,
-          } as StockIn),
-        });
+          const response = await fetch(`${store.baseUrl}/itemstockinsadd`, {
+            method: "POST",
+            headers: {
+              authorization: store.apiKey ?? "",
+            },
+            body: JSON.stringify({
+              ...initialStockIn,
+              qty: state.qty,
+              itemId: isNaN(parseInt(itemId)) ? 0 : parseInt(itemId),
+              projectId: state.selectedProject?.id ?? 0,
+            } as StockIn),
+          });
 
-        if (response.status !== 201) throw "Error adding stockin";
+          if (response.status !== 201) throw "Error adding stockin";
 
-        state.requestStatus = "Success";
-        fetchItemStockIns();
-      } catch (e) {
-        console.log(e);
-        state.requestStatus = "Error";
-      }
+          state.requestStatus = "Success";
+          fetchItemStockIns();
+        } catch (e) {
+          console.log(e);
+          state.requestStatus = "Error";
+        }
+      }      
     };
 
-    const handleSelectProject = (project: Project) => {
-      state.selectedProject = project;
+    const handleSelectProject = (e: any) => {
+      const projectId = e.target.value as string;
+      
+      if (state.selectedProject && projectId) {
+        state.selectedProject.id = isNaN(parseInt(projectId ?? "")) ? 0 : parseInt(projectId ?? "");
+      }
     };
 
     const handleInputStockInQty = (e: any) => {

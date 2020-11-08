@@ -69,7 +69,7 @@
             {{ stockInView.stockIn.pic }}
           </div>
         </div>
-        {{ stockInView.stockIn.createdAt }}
+        <!-- {{ stockInView.stockIn.createdAt }} -->
         <div>On: {{ new Date(stockInView.stockIn.createdAt).toString() }}</div>
         <div v-if="stockInView.project">
           For project:

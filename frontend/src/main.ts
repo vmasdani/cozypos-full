@@ -1,5 +1,6 @@
 import Vue, { createApp, reactive } from 'vue'
 import App from './App.vue'
+import './App.css'
 import router from './router'
 // import 'bootstrap/dist/css/bootstrap.min.css'
 // import 'popper.js'

@@ -17,19 +17,20 @@
       <div class="relative mx-1">
         <select
           class="block appearance-none w-full bg-gray-200 border border-blue-200 text-gray-700 py-3 px-4 pr-8 rounded leading-tight focus:outline-none focus:bg-white focus:border-gray-500"
+          @input="selectProject"
         >
           <option></option>
           <option
             v-for="project in state.projects"
+            :value="project.id"
             :key="project.id"
-            @click="selectProject(project)"
           >
             {{ project.name }}
           </option>
         </select>
       </div>
     </div>
-    <div v-if="state.selectedProject">
+    <div v-if="state.selectedProject.id !== 0">
       <button
         @click="fetchProjectTransactionsView"
         class="font-semibold bg-gray-700 px-2 py-1 text-white rounded-md"
@@ -39,7 +40,7 @@
     </div>
   </div>
   <div
-    v-if="state.selectedProject"
+    v-if="state.selectedProject.id !== 0"
     class="flex items-center m-2"
   >
     <div>
@@ -132,6 +133,7 @@ import { RequestStatus, formatIdr } from "../helpers";
 import { ProjectTransactionsView, TransactionView } from "@/view";
 import LoadingIcon from "@/components/icons/LoadingIcon.vue";
 import { appState } from "@/App.vue";
+import { initialProject } from '@/modelinitials';
 
 export default defineComponent({
   components: {
@@ -139,7 +141,7 @@ export default defineComponent({
   },
   setup() {
     const state = reactive({
-      selectedProject: null as Project | null,
+      selectedProject: { ...initialProject, id: 0 } as Project,
       projects: [] as Project[],
       projectDetails: null,
       projectTransactionsView: null as ProjectTransactionsView | null,
@@ -169,10 +171,14 @@ export default defineComponent({
     // Fetch
     fetchInitialProject();
 
-    const selectProject = (project: Project) => {
-      console.log("Project id:", project.id);
-      state.selectedProject = project;
-      // fetchProjectTransactionsView(project.id);
+    const selectProject = (e: any) => {
+      const projectId = e.target.value ?? 0;
+      console.log("Project:", e.target.value);
+      
+      if (state.selectedProject) {
+        state.selectedProject.id = projectId;
+        // fetchProjectTransactionsView(projectId);
+      }
     };
 
     const comparePriceIsCustomColor = (transactionView: TransactionView) => {

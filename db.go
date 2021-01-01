@@ -1,12 +1,10 @@
 package main
 
 import (
-	"fmt"
 	"log"
-	"os"
 
 	"github.com/joho/godotenv"
-	"gorm.io/driver/mysql"
+	"gorm.io/driver/sqlite"
 	"gorm.io/gorm"
 )
 
@@ -17,16 +15,26 @@ func InitDB() *gorm.DB {
 		log.Fatal("Error loading .env file.")
 	}
 
-	username := os.Getenv("DB_USERNAME")
-	password := os.Getenv("DB_PASSWORD")
-	dbName := os.Getenv("DB_NAME")
+	// username := os.Getenv("DB_USERNAME")
+	// password := os.Getenv("DB_PASSWORD")
+	// dbName := os.Getenv("DB_NAME")
 
-	dsn := fmt.Sprintf("%s:%s@tcp(127.0.0.1:3306)/%s?charset=utf8mb4&parseTime=True&loc=Local", username, password, dbName)
-	db, err := gorm.Open(mysql.Open(dsn), &gorm.Config{})
+	// dsn := fmt.Sprintf("%s:%s@tcp(127.0.0.1:3306)/%s?charset=utf8mb4&parseTime=True&loc=Local", username, password, dbName)
+	// db, err := gorm.Open(mysql.Open(dsn), &gorm.Config{})
+
+	db, err := gorm.Open(sqlite.Open("cozypos.sqlite3"), &gorm.Config{})
 
 	if err != nil {
 		log.Fatal(err)
 	}
+
+	sqlDB, err := db.DB()
+
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	sqlDB.SetMaxOpenConns(1)
 
 	db.AutoMigrate(&ApiKey{})
 	db.AutoMigrate(&Project{})

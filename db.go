@@ -2,6 +2,7 @@ package main
 
 import (
 	"log"
+	"os"
 
 	"github.com/joho/godotenv"
 	"gorm.io/driver/sqlite"
@@ -43,7 +44,18 @@ func InitDB() *gorm.DB {
 	db.AutoMigrate(&Item{})
 	db.AutoMigrate(&ItemTransaction{})
 
-	// populate(db)
+	dotenvErr := godotenv.Load()
+
+	if dotenvErr != nil {
+		log.Fatal("Error loading .env file.")
+
+	}
+
+	populateEnv := os.Getenv("POPULATE")
+
+	if populateEnv == "YES" {
+		populate(db)
+	}
 
 	return db
 }

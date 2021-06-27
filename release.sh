@@ -1,6 +1,6 @@
 mkdir -p release/frontend &&\
-go build &&\
-cp cozypos-full release &&\
+xgo --targets=linux/amd64 . &&\
+cp cozypos-full-linux-amd64 release &&\
 cd frontend &&\
 npm run build &&\
 cp -r dist/* ../release/frontend &&\

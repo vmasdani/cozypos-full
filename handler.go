@@ -50,7 +50,7 @@ func Login(db *gorm.DB) func(w http.ResponseWriter, r *http.Request) {
 		}
 
 		password := os.Getenv("PASSWORD")
-		// fmt.Println(loginPostBody.Password, password)
+		fmt.Println(loginPostBody.Password, password)
 		passwordNotMatchErr := bcrypt.CompareHashAndPassword([]byte(password), []byte(loginPostBody.Password))
 
 		if passwordNotMatchErr != nil {

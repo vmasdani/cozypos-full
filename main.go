@@ -5,10 +5,13 @@ import (
 	"io"
 	"net/http"
 	"strings"
+  "os"
+  "log"
 
 	"github.com/andybalholm/brotli"
 	"github.com/gorilla/mux"
 	"github.com/rs/cors"
+  "github.com/joho/godotenv"
 )
 
 type brotliResponseWriter struct {
@@ -42,21 +45,28 @@ func main() {
 		})
 	})
 
-	r.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
-		fmt.Fprintf(w, "Hello world!")
-	})
-
 	// r.HandleFunc("/ts", Ts())
 	Route(r, db)
+
+  r.PathPrefix("/").Handler(http.StripPrefix("/", http.FileServer(http.Dir("./frontend"))))
 
 	handler := cors.New(cors.Options{
 		AllowedOrigins: []string{"*"},
 		AllowedMethods: []string{"GET", "POST", "PUT", "DELETE"},
 		AllowedHeaders: []string{"*"}}).Handler(r)
 
-	fmt.Println("Serving on port 8080!")
+  err := godotenv.Load()
+
+  if err != nil {
+    log.Fatal("Error loading .env file.")
+    return
+  }
+
+  serverPort := os.Getenv("SERVER_PORT")
+
+	fmt.Println("Serving on port " + serverPort + "!")
 
 	// Generate typescript definitions
 	Ts()
-	http.ListenAndServe(":8080", handler)
+	http.ListenAndServe(":" + serverPort, handler)
 }

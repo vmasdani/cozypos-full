@@ -5,8 +5,9 @@ Cozy Point of Sales application written in Go (backend) and Vue 3 TS (frontend).
 ## Backend
 1. `go get`
 ```
-PASSWORD=<bcrypt hashed password>
+PASSWORD=<bcrypt hashed password i.e. '$2y$12$H9LOay8Q7y.wLyVv1gMG.e7spIZJF/cabuyCeW6.mxLEygzek2mla'>
 POPULATE=NO # yes to populate with initial data
+SERVER_PORT=8080 # server port
 ```
 3. `go build && ./cozypos-full`
 

@@ -3,7 +3,7 @@ module github.com/vmasdani/cozypos-full
 go 1.15
 
 require (
-	github.com/andybalholm/brotli v1.0.1
+	github.com/andybalholm/brotli v1.0.3
 	github.com/gorilla/mux v1.8.0
 	github.com/joho/godotenv v1.3.0
 	github.com/rs/cors v1.7.0
